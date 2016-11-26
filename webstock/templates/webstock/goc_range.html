@@ -1,0 +1,52 @@
+{% load static %}
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<script type="text/javascript">
+window.onload = function () {
+  finals = []
+
+    {% for sr in stock_range %}
+      finals.push({ 'x': new Date("{{ sr.date.isoformat }}"), 'y': [ {{ sr.opening }}, {{ sr.closing }} ]});
+    {% endfor %}
+
+
+  var chart = new CanvasJS.Chart("chartContainer",
+  {
+    title: {
+      text: "Stock History of {{ comp_name }}"
+    },
+    exportEnabled: true,
+    axisX: {
+      interval: 1,
+      valueFormatString: "DD-MM-YYYY"
+    },
+    axisY: {
+      includeZero: false,
+      interval: 5,
+      valueFormatString: "###.##"
+    },
+    toolTip: {
+      content: "{x} </br> Open: {y[0]}, Close: {y[1]}"
+    },
+    data: [
+    {
+      type: "rangeBar",
+      yValueFormatString: "###.##",
+      indexLabel: "{y[#index]}",
+      indexLabelFontSize: 14,
+      dataPoints: finals
+    }
+    ]
+  });
+  chart.render();
+}
+</script>
+<script type="text/javascript" src="{% static 'js/canvas/canvasjs.min.js' %}"></script>
+</head>
+<body>
+<div id="chartContainer" style="height: 300px; width: 100%;">
+</div>
+</body>
+</html>
