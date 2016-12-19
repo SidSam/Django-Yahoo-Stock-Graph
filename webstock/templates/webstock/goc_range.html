@@ -1,52 +1,126 @@
 {% load static %}
 
-<!DOCTYPE HTML>
+<!doctype html>
 <html>
 <head>
-<script type="text/javascript">
-window.onload = function () {
-  finals = []
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stock Graph</title>
+  <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+  <script src="http://code.jquery.com/jquery-2.1.4.min.js" defer></script> 
+  <script type="text/javascript" src="{% static 'js/script.js' %}" defer></script>
+  <script type="text/javascript" src="{% static 'js/canvas/canvasjs.min.js' %}" defer></script>
+  <script type="text/javascript">
+
+    openingfinals = [];
 
     {% for sr in stock_range %}
-      finals.push({ 'x': new Date("{{ sr.date.isoformat }}"), 'y': [ {{ sr.opening }}, {{ sr.closing }} ]});
+      openingfinals.push({ 'x': new Date("{{ sr.date.isoformat }}"), 'y': {{ sr.opening }} });
     {% endfor %}
 
+    var max_opening = openingfinals[0]['y'];
+    var min_opening = openingfinals[0]['y'];
 
-  var chart = new CanvasJS.Chart("chartContainer",
-  {
-    title: {
-      text: "Stock History of {{ comp_name }}"
-    },
-    exportEnabled: true,
-    axisX: {
-      interval: 1,
-      valueFormatString: "DD-MM-YYYY"
-    },
-    axisY: {
-      includeZero: false,
-      interval: 5,
-      valueFormatString: "###.##"
-    },
-    toolTip: {
-      content: "{x} </br> Open: {y[0]}, Close: {y[1]}"
-    },
-    data: [
-    {
-      type: "rangeBar",
-      yValueFormatString: "###.##",
-      indexLabel: "{y[#index]}",
-      indexLabelFontSize: 14,
-      dataPoints: finals
+    for (i=0; i<openingfinals.length; ++i) {
+      if (openingfinals[i]['y'] > max_opening) {
+        max_opening = openingfinals[i]['y'];
+      }
+      if(openingfinals[i]['y'] < min_opening) {
+        min_opening = openingfinals[i]['y'];
+      }
     }
-    ]
-  });
-  chart.render();
-}
-</script>
-<script type="text/javascript" src="{% static 'js/canvas/canvasjs.min.js' %}"></script>
+    console.log(openingfinals);
+    closingfinals = [];
+
+    {% for sr in stock_range %}
+      closingfinals.push({ 'x': new Date("{{ sr.date.isoformat }}"), 'y': {{ sr.closing }} });
+    {% endfor %}
+
+    var max_closing = closingfinals[0]['y'];
+    var min_closing = closingfinals[0]['y'];
+
+    for (i=0; i<closingfinals.length; ++i) {
+      if (closingfinals[i]['y'] > max_closing) {
+        max_closing = closingfinals[i]['y'];
+      }
+      if(closingfinals[i]['y'] < min_closing) {
+        min_closing = closingfinals[i]['y'];
+      }
+    }
+
+    window.onload = function () {
+      var openingchart = new CanvasJS.Chart("openingstocks",
+      {
+
+        title:{
+        text: "Opening Stock History for {{ comp_name }}"
+        },
+        exportEnabled: true,
+        axisX: {
+          valueFormatString: 'DD-MM-YYYY',
+          /*interval: 1
+          minimum: new Date(2016, 12, 12),
+          maximum: new Date(2016, 12, 14),
+          xValueType: 'dateTime'*/
+        },
+        axisY: {
+          interval: Math.ceil(max_opening - min_opening),
+          includeZero: false
+        },
+        data: [
+        {
+          type: "line",
+          dataPoints: openingfinals
+        }
+        ]
+      });
+
+      var closingchart = new CanvasJS.Chart("closingstocks",
+      {
+
+        title:{
+        text: "Closing Stock History for {{ comp_name }}"
+        },
+        exportEnabled: true,
+        axisX: {
+          valueFormatString: 'DD-MM-YYYY',
+          //interval: 1
+          includeZero: false
+        },
+        axisY: {
+          interval: Math.ceil(max_opening - min_opening),
+          includeZero: false
+        },
+        data: [
+        {
+          type: "line",
+          dataPoints: closingfinals
+        }
+        ]
+      });
+    
+    openingchart.render();
+    closingchart.render();
+  };
+  </script>
 </head>
+
 <body>
-<div id="chartContainer" style="height: 300px; width: 100%;">
+<div class="card-menu">
+  <div class="card-menu__close-menu"></div>
+  <div class="card-menu__section card-menu__section-1 active" data-section="1">
+    <div class="card-menu__menu-btn"></div>
+    <h2 class="card-menu__section-heading">Graphs are laid out in the form of stacked cards. You can toggle between the "stacked" view and the individual "card" view by using the hamburger/cross icon</h2>
+  </div>
+  <div class="card-menu__section card-menu__section-2 inactive" data-section="2">
+    <div class="card-menu__menu-btn"></div>
+    <h2 class="card-menu__section-heading" id='openingstocks'></h2>
+  </div>
+  <div class="card-menu__section card-menu__section-3 inactive" data-section="3">
+    <div class="card-menu__menu-btn"></div>
+    <h2 class="card-menu__section-heading" id='closingstocks'></h2>
+  </div>
 </div>
 </body>
 </html>
