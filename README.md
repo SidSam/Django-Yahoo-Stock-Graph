@@ -8,6 +8,8 @@ There are basically two URLs:
 
 The dates are in DDMMYYYY format.
 
+The company name is entered as its symbol. Example - 'YHOO' for Yahoo and 'ADBE' for Adobe
+
 I have not added any styling to the first page since it's just a JSON object being displayed, and no styling in the second page either as it's just a graph.
 
 Since this app uses CanvasJS and the Yahoo! Finance PyPi module, you'd have to install them to make the app run on your machine.
